@@ -3,25 +3,20 @@ package netgloo.controllers;
 import netgloo.models.User;
 import netgloo.models.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping(value = "/user")
 public class UserController {
 
-    // ------------------------
-    // PRIVATE FIELDS
-    // ------------------------
     @Autowired
     private UserDao userDao;
 
-    @RequestMapping("/create")
+    @RequestMapping(value = "/create")
     @ResponseBody
-    public String create(String email, String name) {
-        User user = null;
+    @PostMapping(produces = "application/json")
+    public String create(@RequestBody User user) {
         try {
-            user = new User(email, name);
             userDao.save(user);
         } catch (Exception ex) {
             return "Error creating the user: " + ex.toString();
@@ -31,6 +26,7 @@ public class UserController {
 
     @RequestMapping("/delete")
     @ResponseBody
+    @DeleteMapping(produces = "application/json")
     public String delete(long id) {
         try {
             User user = new User(id);
@@ -41,8 +37,9 @@ public class UserController {
         return "User succesfully deleted!";
     }
 
-    @RequestMapping("/get-by-email")
+    @RequestMapping("/email")
     @ResponseBody
+    @GetMapping(produces = "application/json")
     public String getByEmail(String email) {
         String userId;
         try {
@@ -54,14 +51,15 @@ public class UserController {
         return "The user id is: " + userId;
     }
 
-    @RequestMapping("/update")
+    @RequestMapping(value = "/update")
     @ResponseBody
-    public String updateUser(long id, String email, String name) {
+    @PutMapping(produces = "application/json")
+    public String updateUser(@RequestBody User user) {
         try {
-            User user = userDao.findOne(id);
-            user.setEmail(email);
-            user.setName(name);
-            userDao.save(user);
+            User updatedUser = userDao.findOne(user.getId());
+            updatedUser.setEmail(user.getEmail());
+            updatedUser.setName(user.getName());
+            userDao.save(updatedUser);
         } catch (Exception ex) {
             return "Error updating the user: " + ex.toString();
         }
